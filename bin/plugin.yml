@@ -1,0 +1,26 @@
+name: Champions
+author: LimeGlass
+description: Champions, pvp with abilities in a gamemode.
+version: 1.0.0
+main: me.limeglass.champions.Champions
+commands:
+  champions:
+    description: Champions main command.
+    usage: /champions
+    permission: champions.use
+permissions:
+  champions.*:
+    description: Gives access to all Champions commands.
+    children:
+      champions.ingame.moveinventory: true
+      champions.bungeemode.moveinventory: true
+      champions.admin: true
+  champions.ingame.moveinventory:
+    description: Gives access to move items in the inventory while ingame.
+    default: op
+  champions.bungeemode.moveinventory:
+    description: Gives access to move items in the inventory when the bungeecord mode is enabled.
+    default: op
+  champions.admin:
+    description: Gives access to setup champions and other components.
+    default: op

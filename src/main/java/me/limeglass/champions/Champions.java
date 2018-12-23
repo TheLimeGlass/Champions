@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -17,7 +18,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.limeglass.champions.commands.CommandHandler;
 import me.limeglass.champions.listeners.EventListener;
 import me.limeglass.champions.managers.GameManager;
-import me.limeglass.champions.objects.ChampionsGame;
 import me.limeglass.champions.utils.Utils;
 
 /*
@@ -27,13 +27,12 @@ import me.limeglass.champions.utils.Utils;
 
 public class Champions extends JavaPlugin {
 	
-	private static Map<String, FileConfiguration> files = new HashMap<String, FileConfiguration>();
-	private static Set<ChampionsAddon> addons = new HashSet<ChampionsAddon>();
-	//Nameplate is currently only used in console prefix messages.
+	private static Map<String, FileConfiguration> files = new HashMap<>();
+	private static Set<ChampionsAddon> addons = new HashSet<>();
 	private final static String nameplate = "[Champions] ";
 	private static ChampionsAddon registrar;
-	private static Champions instance;
 	private static File championsDataFolder;
+	private static Champions instance;
 	
 	public void onEnable(){
 		instance = this;
@@ -42,11 +41,11 @@ public class Champions extends JavaPlugin {
 		File configFile = new File(getDataFolder(), "config.yml");
 		championsDataFolder = new File(getDataFolder(), File.separator + "data");
 		championsDataFolder.mkdir();
-		//If newer version was found, update config.
+		//If newer version was found, update configuration.
 		if (!getDescription().getVersion().equals(getConfig().getString("version"))) {
 			if (configFile.exists()) configFile.delete();
 		}
-		//Create all the default files
+		//Create all the default files.
 		for (String name : Arrays.asList("config", "data", "joinItems", "abilities", "messages", "kits", "menus")) {
 			File file = new File(getDataFolder(), name + ".yml");
 			if (!file.exists()) {
@@ -69,9 +68,7 @@ public class Champions extends JavaPlugin {
 	}
 	
 	public void onDisable() {
-		for (ChampionsGame game : GameManager.tempgames.values()) {
-			game.delete();
-		}
+		GameManager.tempgames.values().forEach(game -> game.delete());
 	}
 	
 	public static void save(String configuration) {
@@ -92,7 +89,14 @@ public class Champions extends JavaPlugin {
 		addons.add(addon);
 	}
 	
-	public static ChampionsAddon getRegistrar() {
+	//Used internally, there is no need to use this method.
+	public static Optional<ChampionsAddon> getCurrentRegistrar() {
+		return addons.parallelStream()
+				.filter(addon -> addon.isCurrentlyLoading())
+				.findFirst();
+	}
+	
+	public static ChampionsAddon getOwnRegistrar() {
 		return registrar;
 	}
 	
@@ -104,7 +108,11 @@ public class Champions extends JavaPlugin {
 		return getConfiguration("config").getBoolean("Bungeecord");
 	}
 	
-	//Grabs a FileConfiguration of a defined name. The name can't contain .yml in it.
+	/**
+	 * Grabs a FileConfiguration of a defined name. The name can't contain .yml in it.
+	 * @param file The name of the file without any extension.
+	 * @return The FileConfiguration of the named file if found.
+	 */
 	public static FileConfiguration getConfiguration(String file) {
 		return (files.containsKey(file)) ? files.get(file) : null;
 	}
@@ -121,7 +129,4 @@ public class Champions extends JavaPlugin {
 		return championsDataFolder;
 	}
 
-	public static void setChampionsDataFolder(File championsDataFolder) {
-		Champions.championsDataFolder = championsDataFolder;
-	}
 }

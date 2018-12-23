@@ -13,7 +13,6 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import me.limeglass.champions.abstracts.Ability;
 import me.limeglass.champions.objects.ChampionsPlayer;
 
-//Ability abstract for registering abilities really easily.
 public class TestAbility extends Ability {
 
 	static {
@@ -35,7 +34,7 @@ public class TestAbility extends Ability {
 	}
 
 	//The event that I explained above. This is what triggers the ability. This will be called when the user is involved in the defined event defined when registering.
-	//This must return the player so that Kitpvp knows who the ability is for. Return null if the event hasn't matched.
+	//This must return the player so that Champions knows who the ability is for. Return null if the event hasn't matched.
 	@Override
 	public Player check(Event event) {
 		if (((PlayerInteractEvent)event).hasItem()) {
@@ -60,4 +59,5 @@ public class TestAbility extends Ability {
 		fireworkMeta.setPower(1);
 		firework.setFireworkMeta(fireworkMeta);
 	}
+
 }

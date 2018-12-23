@@ -20,8 +20,8 @@ public class YamlMenu extends Menu {
 		}
 	}
 	
-	private final String node;
 	private final Boolean hasFunctions;
+	private final String node;
 	
 	public YamlMenu(String name) {
 		super(name, menu.getInt("Menus." + name + ".size", 6), menu.getString("Menus." + name + ".header", "&4Invalid header"));
@@ -38,15 +38,11 @@ public class YamlMenu extends Menu {
 		return items;
 	}
 	
-	public Boolean hasFunctions() {
-		return hasFunctions;
-	}
-	
-	public Set<String> getFunctions() {
+	private Set<String> getFunctions() {
 		return (hasFunctions) ? menu.getConfigurationSection(node + ".functions").getKeys(false) : null;
 	}
 	
-	public String getFunction(int slot) {
+	private String getFunction(int slot) {
 		for (String function : getFunctions()) {
 			if (menu.getInt(node + ".functions." + function) == slot) return function;
 		}
@@ -59,4 +55,5 @@ public class YamlMenu extends Menu {
 			event.getWhoClicked().openInventory(InventoryManager.get(getFunction(event.getSlot())));
 		}
 	}
+
 }

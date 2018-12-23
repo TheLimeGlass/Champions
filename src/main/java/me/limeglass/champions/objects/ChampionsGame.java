@@ -1,10 +1,10 @@
 package me.limeglass.champions.objects;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -17,15 +17,15 @@ import me.limeglass.champions.managers.PlayerManager;
 
 public class ChampionsGame {
 	
-	private Map<Integer, Set<Location>> KIT_SPAWNS = new HashMap<Integer, Set<Location>>();
-	private Map<String, Location> CAPTURES = new HashMap<String, Location>();
 	private FileConfiguration data = Champions.getConfiguration("data");
-	private Set<Location> SPECTATOR_SPAWNS = new LinkedHashSet<Location>();
-	private Set<Location> TEAM1_SPAWNS = new LinkedHashSet<Location>();
-	private Set<Location> TEAM2_SPAWNS = new LinkedHashSet<Location>();
+	private Map<Integer, Set<Location>> KIT_SPAWNS = new HashMap<>();
+	private Set<Location> SPECTATOR_SPAWNS = new LinkedHashSet<>();
+	private Set<Location> TEAM1_SPAWNS = new LinkedHashSet<>();
+	private Set<Location> TEAM2_SPAWNS = new LinkedHashSet<>();
+	private Map<String, Location> CAPTURES = new HashMap<>();
 	private final ChampionsMode mode;
 	private ChampionsState state;
-	private Boolean captures;
+	private boolean captures;
 	private String name;
 	
 	private enum ChampionsState {
@@ -45,15 +45,14 @@ public class ChampionsGame {
 		this.name = name;
 		data.set("Arenas." + name + ".gamemode", mode.toString());
 		Champions.save("data");
-		if (!temp) GameManager.addGame(this);
+		if (!temp)
+			GameManager.addGame(this);
 	}
 	
 	public final Set<ChampionsPlayer> getPlayers() {
-		Set<ChampionsPlayer> players = new HashSet<ChampionsPlayer>();
-		for (ChampionsPlayer player : PlayerManager.getPlayers()) {
-			if (player.getMap().equalsIgnoreCase(name)) players.add(player);
-		}
-		return players;
+		return PlayerManager.getPlayers().parallelStream()
+				.filter(player -> player.getMap().equalsIgnoreCase(name))
+				.collect(Collectors.toSet());
 	}
 
 	public Boolean isIngame() {
@@ -93,7 +92,7 @@ public class ChampionsGame {
 	public void delete() {
 		data.set("Arenas." + name, null);
 		if (GameManager.containsGame(name)) {
-			GameManager.removeGame(GameManager.getGame(name));
+			GameManager.removeGame(this);
 		}
 		Champions.save("data");
 	}
@@ -201,4 +200,5 @@ public class ChampionsGame {
 	public ChampionsMode getMode() {
 		return mode;
 	}
+
 }

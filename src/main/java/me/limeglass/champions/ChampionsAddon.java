@@ -19,10 +19,11 @@ import me.limeglass.champions.listeners.EventHandler;
 
 public class ChampionsAddon {
 	
-	private Set<Class<?>> classes = new HashSet<Class<?>>();
-	private Set<Ability> abilities = new HashSet<Ability>();
+	private Set<Ability> abilities = new HashSet<>();
+	private Set<Class<?>> classes = new HashSet<>();
 	private Set<Menu> menus = new HashSet<Menu>();
 	private JavaPlugin plugin;
+	private boolean current;
 	private JarFile jar;
 	
 	public ChampionsAddon(JavaPlugin plugin) {
@@ -49,23 +50,27 @@ public class ChampionsAddon {
 			method.setAccessible(true);
 			File file = (File) method.invoke(plugin);
 			return new JarFile(file);
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {}
+		} catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
-	public void loadClasses(String basePackage, final String... subPackages) {
-		assert subPackages != null;
+	public void loadClasses(String basePackage, String... subPackages) {
+		if (subPackages == null)
+			return;
 		for (int i = 0; i < subPackages.length; i++) {
 			subPackages[i] = subPackages[i].replace('.', '/') + "/";
 		}
 		basePackage = basePackage.replace('.', '/') + "/";
+		this.current = true;
 		try {
 			for (Enumeration<JarEntry> jarEntry = jar.entries(); jarEntry.hasMoreElements();) {
 				String name = jarEntry.nextElement().getName();
 				if (name.startsWith(basePackage) && name.endsWith(".class")) {
-					for (final String sub : subPackages) {
+					for (String sub : subPackages) {
 						if (name.startsWith(sub, basePackage.length())) {
-							final String clazz = name.replace("/", ".").substring(0, name.length() - 6);
+							String clazz = name.replace("/", ".").substring(0, name.length() - 6);
 							classes.add(Class.forName(clazz, true, plugin.getClass().getClassLoader()));
 						}
 					}
@@ -76,8 +81,16 @@ public class ChampionsAddon {
 		} finally {
 			try {
 				jar.close();
-			} catch (final IOException e) {}
+			} catch (final IOException e) {
+				e.printStackTrace();
+			}
 		}
-		Champions.debugMessage("Loaded a total of " + menus.size() + " Menus and " + abilities.size() + " Abilities for plugin " + plugin.getName());
+		this.current = false;
+		Champions.debugMessage("Loaded a total of " + menus.size() + " Menus and " + abilities.size() + " Abilities for the plugin " + plugin.getName());
 	}
+
+	public boolean isCurrentlyLoading() {
+		return current;
+	}
+
 }

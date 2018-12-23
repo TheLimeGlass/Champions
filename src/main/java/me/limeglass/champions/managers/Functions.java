@@ -8,8 +8,6 @@ import me.limeglass.champions.objects.ChampionsPlayer;
 
 public class Functions {
 	
-	//private static String[] functions = new String[] {"Quit", "ConsoleCommand", "PlayerCommand"};
-	
 	public static void executeFunction(@Nullable ChampionsPlayer player, String function) {
 		if (function.contains("ConsoleCommand")) {
 			consoleCommand(function);
@@ -47,4 +45,5 @@ public class Functions {
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
 		}
 	}
+
 }

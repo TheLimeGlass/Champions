@@ -2,6 +2,8 @@ package me.limeglass.champions.managers;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 
 import me.limeglass.champions.abstracts.Menu;
@@ -9,14 +11,16 @@ import me.limeglass.champions.utils.Utils;
 
 public class InventoryManager {
 
-	private static Map<String, Menu> menus = new HashMap<String, Menu>();
+	private static Map<String, Menu> menus = new HashMap<>();
 	
-	public static void addMenu(String name, Menu menu) {
-		if (!menus.containsKey(name)) menus.put(name, menu);
+	public static void addMenu(Menu menu) {
+		if (!menus.containsKey(menu.getName()))
+			menus.put(menu.getName(), menu);
 	}
 	
 	public static void removeMenu(String name) {
-		if (menus.containsKey(name)) menus.remove(name);
+		if (menus.containsKey(name))
+			menus.remove(name);
 	}
 	
 	public static Map<String, Menu> getMenus() {
@@ -25,14 +29,15 @@ public class InventoryManager {
 	
 	public static Boolean isMenu(Inventory inventory) {
 		for (Menu menu : menus.values()) {
-			if (inventory.getName().equals(Utils.cc(menu.getHeader())) && menu.build().getType() == inventory.getType()) return true;
+			if (inventory.getName().equals(Utils.cc(menu.getHeader())) && InventoryType.CHEST == inventory.getType())
+				return true;
 		}
 		return false;
 	}
 	
 	public static Boolean isMenu(Inventory inventory, String name) {
 		for (Menu menu : menus.values()) {
-			if (inventory.getName().equals(Utils.cc(menu.getHeader())) && menu.build().getType() == inventory.getType() && menu.getName().equals(name)) {
+			if (inventory.getName().equals(Utils.cc(menu.getHeader())) && InventoryType.CHEST == inventory.getType() && menu.getName().equals(name)) {
 				return true;
 			}
 		}
@@ -42,7 +47,8 @@ public class InventoryManager {
 	public static Menu getMenu(Inventory inventory) {
 		if (isMenu(inventory)) {
 			for (Menu menu : menus.values()) {
-				if (inventory.getName().equals(Utils.cc(menu.getHeader())) && menu.build().getType() == inventory.getType()) return menu;
+				if (inventory.getName().equals(Utils.cc(menu.getHeader())) && InventoryType.CHEST == inventory.getType())
+					return menu;
 			}
 		}
 		return null;
@@ -54,8 +60,5 @@ public class InventoryManager {
 		}
 		return null;
 	}
-	
-	public static void clearMenus() {
-		menus.clear();
-	}
+
 }

@@ -3,7 +3,7 @@ package me.limeglass.champions.listeners;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -20,13 +20,14 @@ import me.limeglass.champions.objects.ChampionsPlayer;
 
 public class EventHandler {
 	
-	private static Event last;
-	private static Set<Class<? extends Event>> registeredEvents = new HashSet<Class<? extends Event>>();
+	private static Map<Ability, Class<? extends Event>[]> abilities = new HashMap<>();
+	private static Set<Class<? extends Event>> registeredEvents = new HashSet<>();
 	private final static Listener listener = new Listener(){};
-	private static Map<Ability, Class<? extends Event>[]> abilities = new HashMap<Ability, Class<? extends Event>[]>();
+	private static Event last;
 	
 	public static void remove(Ability ability) {
-		if (abilities.containsKey(ability)) abilities.remove(ability);
+		if (abilities.containsKey(ability))
+			abilities.remove(ability);
 	}
 	
 	public static Map<Ability, Class<? extends Event>[]> getEventAbilities() {
@@ -35,18 +36,22 @@ public class EventHandler {
 	
 	final static EventExecutor executor = new EventExecutor() {
 		@Override
-		public void execute(final Listener listner, final Event event) {
-			if (event == null || last == event) return; // an event is received multiple times if multiple superclasses of it are registered
+		public void execute(Listener listner, Event event) {
+			if (event == null || last == event)
+				return; // an event is received multiple times if multiple superclasses of it are registered.
 			last = event;
-			for (Entry<Ability, Class<? extends Event>[]> entry : abilities.entrySet()) {
+			abilities.entrySet().forEach(entry -> {
 				Player player = entry.getKey().check(event);
 				if (player != null) {
-					ChampionsPlayer championsPlayer = PlayerManager.getChampionsPlayer(player);
-					if (championsPlayer != null && championsPlayer.hasKit() && championsPlayer.getKit().getAbilities().contains(entry.getKey())) {
-						entry.getKey().onAbilityExecute(championsPlayer);
+					Optional<ChampionsPlayer> optional = PlayerManager.getChampionsPlayer(player);
+					if (optional.isPresent()) {
+						ChampionsPlayer championsPlayer = optional.get();
+						if (championsPlayer.hasKit() && championsPlayer.getKit().getAbilities().contains(entry.getKey())) {
+							entry.getKey().onAbilityExecute(championsPlayer);
+						}
 					}
 				}
-			}
+			});
 		}
 	};
 	
@@ -60,4 +65,5 @@ public class EventHandler {
 			}
 		}
 	}
+
 }

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.attribute.Attribute;
@@ -75,7 +76,9 @@ public class Kit {
 	public void executeAbilities(ChampionsPlayer player, String... abilities) {
 		if (hasAbilities && getAbilities() != null) {
 			for (String ability : abilities) {
-				AbilityManager.getAbility(ability).onAbilityExecute(player);
+				Optional<Ability> optional = AbilityManager.getAbility(ability);
+				if (optional.isPresent())
+					optional.get().onAbilityExecute(player);
 			}
 		}
 	}
@@ -126,4 +129,5 @@ public class Kit {
 	public Boolean getHasItems() {
 		return hasItems;
 	}
+
 }

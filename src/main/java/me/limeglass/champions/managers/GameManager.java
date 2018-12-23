@@ -3,8 +3,10 @@ package me.limeglass.champions.managers;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -16,55 +18,48 @@ import me.limeglass.champions.utils.Utils;
 
 public class GameManager {
 
-	public static Map<Player, ChampionsGame> tempgames = new HashMap<Player, ChampionsGame>();
-	private static Set<ChampionsGame> games = new HashSet<ChampionsGame>();
+	public static Map<Player, ChampionsGame> tempgames = new HashMap<>();
+	private static Set<ChampionsGame> games = new HashSet<>();
 	
 	public static void addGame(ChampionsGame game) {
-		if (!games.contains(game)) games.add(game);
+		if (!games.contains(game))
+			games.add(game);
 	}
 	
 	public static void removeGame(ChampionsGame game) {
 		game.end();
-		if (games.contains(game)) games.remove(game);
+		if (games.contains(game))
+			games.remove(game);
 	}
 	
 	public static Boolean containsGame(String name) {
-		return getGame(name) != null;
+		return getGame(name).isPresent();
 	}
 	
 	public static Set<ChampionsGame> getGames() {
 		return games;
 	}
 	
-	public static ChampionsGame getGame(String name) {
-		for (ChampionsGame game : games) {
-			if (game.getName().equals(name)) {
-				return game;
-			}
-		}
-		return null;
+	public static Optional<ChampionsGame> getGame(String name) {
+		return games.parallelStream()
+				.filter(game -> game.getName().equals(name))
+				.findFirst();
 	}
 	
 	public static Set<ChampionsGame> getRunningGames() {
-		Set<ChampionsGame> running = new HashSet<ChampionsGame>();
-		for (ChampionsGame game : games) {
-			if (game.isIngame()) running.add(game);
-		}
-		return (running != null && !running.isEmpty()) ? running : null;
+		return games.parallelStream()
+				.filter(game -> game.isIngame())
+				.collect(Collectors.toSet());
 	}
 	
 	public static Set<ChampionsGame> getIdlingGames() {
-		Set<ChampionsGame> idle = new HashSet<ChampionsGame>();
-		for (ChampionsGame game : games) {
-			if (!game.isIngame()) idle.add(game);
-		}
-		return (idle != null && !idle.isEmpty()) ? idle : null;
+		return games.parallelStream()
+				.filter(game -> !game.isIngame())
+				.collect(Collectors.toSet());
 	}
 	
-	public static void clearGames() {
-		for (ChampionsGame game : games) {
-			game.end();
-		}
+	public static void endGames() {
+		games.forEach(game -> game.end());
 		games.clear();
 	}
 	
@@ -74,4 +69,5 @@ public class GameManager {
 			new ChampionsGame(false, UUID.randomUUID().toString(), Utils.getEnum(ChampionsMode.class, configuration.getString("Arenas." + arena + ".gamemode", "TEAMDEATHMATCH")));
 		}
 	}
+
 }

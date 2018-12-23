@@ -1,5 +1,7 @@
 package me.limeglass.champions.listeners;
 
+import java.util.Optional;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -14,6 +16,8 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
 import me.limeglass.champions.Champions;
 import me.limeglass.champions.managers.Functions;
 import me.limeglass.champions.managers.InventoryManager;
@@ -25,22 +29,30 @@ public class EventListener implements Listener {
 	
 	@EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-		final FileConfiguration joinItems = Champions.getConfiguration("joinItems");
+		FileConfiguration items = Champions.getConfiguration("joinItems");
 		Inventory inventory = event.getClickedInventory();
 		Player player = (Player) event.getWhoClicked();
-		ChampionsPlayer championsPlayer = PlayerManager.getChampionsPlayer(player);
+		Optional<ChampionsPlayer> optional = PlayerManager.getChampionsPlayer(player);
+		if (!optional.isPresent())
+			return;
+		ChampionsPlayer championsPlayer = optional.get();
 		if (InventoryManager.isMenu(inventory)) {
 			event.setCancelled(true);
 			InventoryManager.getMenu(inventory).onInventoryClick(event);
 		} else if (inventory.getType() == InventoryType.PLAYER && championsPlayer.isIngame()) {
-			if (!player.hasPermission("champions.ingame.moveinventory")) event.setCancelled(true);
+			if (!player.hasPermission("champions.ingame.moveinventory"))
+				event.setCancelled(true);
 		} else if (inventory.getType() == InventoryType.PLAYER && championsPlayer.isConnected()) {
-			if (Champions.isBungeecordMode() && !player.hasPermission("champions.bungeemode.moveinventory")) event.setCancelled(true);
-			if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
-				if (Utils.getItem(joinItems, "JoinItems." + event.getSlot()).isSimilar(event.getCurrentItem())) {
+			if (Champions.isBungeecordMode() && !player.hasPermission("champions.ingame.moveinventory")) {
+				event.setCancelled(true);
+				return;
+			}
+			ItemStack current = event.getCurrentItem();
+			if (current != null && current.getType() != Material.AIR) {
+				if (Utils.getItem(items, "JoinItems." + event.getSlot()).isSimilar(current)) {
 					event.setCancelled(true);
-					if (joinItems.isSet("JoinItems." + event.getSlot() + ".function")) {
-						Functions.executeFunction(championsPlayer, joinItems.getString("JoinItems." + event.getSlot() + ".function"));
+					if (items.isSet("JoinItems." + event.getSlot() + ".function")) {
+						Functions.executeFunction(championsPlayer, items.getString("JoinItems." + event.getSlot() + ".function"));
 					}
 				}
 			}
@@ -49,16 +61,21 @@ public class EventListener implements Listener {
 	
 	@EventHandler
     public void onInteract(PlayerInteractEvent event) {
-		final FileConfiguration joinItems = Champions.getConfiguration("joinItems");
+		FileConfiguration items = Champions.getConfiguration("joinItems");
 		Player player = event.getPlayer();
-		ChampionsPlayer championsPlayer = PlayerManager.getChampionsPlayer(player);
-		if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			if (event.getItem() != null && event.getItem().getType() != Material.AIR && championsPlayer.isConnected()) {
-				for (String slot : joinItems.getConfigurationSection("JoinItems").getKeys(false)) {
-					if (Utils.getItem(joinItems, "JoinItems." + slot).isSimilar(event.getItem())) {
+		Optional<ChampionsPlayer> optional = PlayerManager.getChampionsPlayer(player);
+		if (!optional.isPresent())
+			return;
+		ChampionsPlayer championsPlayer = optional.get();
+		Action action = event.getAction();
+		ItemStack item = event.getItem();
+		if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+			if (item != null && item.getType() != Material.AIR && championsPlayer.isConnected()) {
+				for (String slot : items.getConfigurationSection("JoinItems").getKeys(false)) {
+					if (Utils.getItem(items, "JoinItems." + slot).isSimilar(event.getItem())) {
 						event.setCancelled(true);
-						if (joinItems.isSet("JoinItems." + slot + ".function")) {
-							Functions.executeFunction(championsPlayer, joinItems.getString("JoinItems." + slot + ".function"));
+						if (items.isSet("JoinItems." + slot + ".function")) {
+							Functions.executeFunction(championsPlayer, items.getString("JoinItems." + slot + ".function"));
 							break;
 						}
 					}
@@ -72,11 +89,14 @@ public class EventListener implements Listener {
 		if (Champions.isBungeecordMode()) {
 			final Player player = event.getPlayer();
 			//This task is delayed because on some Minecraft versions there is a glitch that when clearing an inventory on join
-			//it makes the player deal less damage for some reason.`
+			//it makes the player deal less damage for some reason.
 			Bukkit.getScheduler().scheduleSyncDelayedTask(Champions.getInstance(), new Runnable() {
 				@Override
 				public void run() {
-					PlayerManager.getChampionsPlayer(player).join();
+					Optional<ChampionsPlayer> optional = PlayerManager.getChampionsPlayer(player);
+					if (!optional.isPresent())
+						return;
+					optional.get().join();
 				}
 			}, 1);
 		}
@@ -86,13 +106,18 @@ public class EventListener implements Listener {
     public void onDisconnect(PlayerQuitEvent event) {
 		//because Spigot unloads plugins before this event is called...
 		try {
-			ChampionsPlayer player = PlayerManager.getChampionsPlayer(event.getPlayer());
+			Optional<ChampionsPlayer> optional = PlayerManager.getChampionsPlayer(event.getPlayer());
+			if (!optional.isPresent())
+				return;
+			ChampionsPlayer player = optional.get();
 			PlayerManager.removePlayer(player);
 		} catch (Exception stupidSpigot) {}
     }
 	
 	@EventHandler
     public void onDisconnect(WeatherChangeEvent event) {
-		if (Champions.isBungeecordMode()) event.setCancelled(event.toWeatherState());
+		if (Champions.isBungeecordMode())
+			event.setCancelled(event.toWeatherState());
     }
+
 }

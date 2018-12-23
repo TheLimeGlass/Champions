@@ -19,6 +19,8 @@ import me.limeglass.champions.utils.Utils;
 
 public class CommandHandler implements CommandExecutor {
 
+	//TODO Turn this into an abstract API calling like Abilities.
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!(sender instanceof Player)) {
@@ -120,4 +122,5 @@ public class CommandHandler implements CommandExecutor {
 		}
 		return true;
 	}
+
 }

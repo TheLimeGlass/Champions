@@ -16,8 +16,8 @@ import me.limeglass.champions.utils.Utils;
 
 public class ChampionsPlayer {
 	
-	private Boolean ingame = false, connected = false;
 	private ChampionsScoreboard scoreboard;
+	private boolean ingame, connected;
 	private Location pastLocation;
 	private final Player player;
 	private Inventory saved;
@@ -52,33 +52,37 @@ public class ChampionsPlayer {
 	
 	public void playSound(String node) {
 		if (Champions.getConfiguration("config").getBoolean(node + ".enabled", true)) {
-			float[] pitches = new float[]{0.5F, 0.6F, 0.7F, 0.8F, 0.9F, 1.0F, 1.1F, 1.2F, 1.3F, 1.4F, 1.5F, 1.6F, 1.7F, 1.8F, 1.9F, 2.0F};
+			float[] pitches = new float[] {0.5F, 0.6F, 0.7F, 0.8F, 0.9F, 1.0F, 1.1F, 1.2F, 1.3F, 1.4F, 1.5F, 1.6F, 1.7F, 1.8F, 1.9F, 2.0F};
 			Sound sound = Utils.getEnum(Sound.class, Champions.getConfiguration("config").getString(node + ".sound"));
 			int pitch = Champions.getConfiguration("config").getInt(node + ".pitch", 6);
 			player.playSound(getLocation(), sound, SoundCategory.RECORDS, 10 / Champions.getConfiguration("config").getLong(node + ".volume", 1L), pitches[pitch]);
 		}
 	}
 	
-	public final Player getPlayer() {
-		return player;
+	public final World getWorld() {
+		return player.getLocation().getWorld();
 	}
 	
 	public final Location getLocation() {
 		return player.getLocation();
 	}
 	
-	public final World getWorld() {
-		return player.getLocation().getWorld();
-	}
-	
-	public String getMap() {
-		return map;
+	public final Player getPlayer() {
+		return player;
 	}
 	
 	public void setMap(String map) {
 		this.map = map;
 	}
+	
+	public String getMap() {
+		return map;
+	}
 
+	public void setIngame(Boolean ingame) {
+		this.ingame = ingame;
+	}
+	
 	public Boolean isIngame() {
 		return ingame;
 	}
@@ -88,12 +92,9 @@ public class ChampionsPlayer {
 	}
 	
 	public Boolean isConnected() {
-		if (Champions.isBungeecordMode()) connected = true;
+		if (Champions.isBungeecordMode())
+			connected = true;
 		return connected;
-	}
-	
-	public void setIngame(Boolean ingame) {
-		this.ingame = ingame;
 	}
 
 	public Kit getKit() {
@@ -144,8 +145,10 @@ public class ChampionsPlayer {
 		if (Champions.getConfiguration("config").getBoolean("endTeleportSpawn")) {
 			player.teleport(ChampionsData.getSpawn());
 		} else {
-			if (pastLocation == null) player.teleport(ChampionsData.getSpawn());
-			else player.teleport(pastLocation);
+			if (pastLocation == null) 
+				player.teleport(ChampionsData.getSpawn());
+			else 
+				player.teleport(pastLocation);
 		}
 		//TODO insert quit stuff
 	}
@@ -165,4 +168,5 @@ public class ChampionsPlayer {
 		player.teleport(ChampionsData.getSpawn());
 		connected = true;
 	}
+
 }
