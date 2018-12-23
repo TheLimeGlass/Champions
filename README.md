@@ -1,2 +1,2 @@
-# BungeeTickets
-A ticketing system for Bungeecord.
+# Champions
+Champions, pvp with abilities in a gamemode.

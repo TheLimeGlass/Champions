@@ -1,0 +1,46 @@
+# Configure all Kits here
+
+# Keep in mind that when editing the inventory. There can't be two of the same name and matieral combo.
+# You need to have different names for each kit.
+
+# Enchantments can be found here: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/enchantments/Enchantment.html
+# Materials can be found here: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+
+Kits:
+    Warrior:
+        inventory:
+            name: "&6&lWarrior"
+            material: "DIAMOND_SWORD"
+            colour: -1
+            lores:
+                - Click to select the Warrior kit!
+            itemflags:
+                - HIDE_UNBREAKABLE
+            enchantments:
+                - "PROTECTION_ENVIRONMENTAL:2"
+        kit:
+            helmet:
+                material: "DIAMOND_HELMET"
+                enchantments:
+                    - "PROTECTION_ENVIRONMENTAL:2"
+            chestplate:
+                material: "IRON_CHESTPLATE"
+                enchantments:
+                    - "PROTECTION_ENVIRONMENTAL:2"
+            leggings:
+                material: "IRON_LEGGINGS"
+                enchantments:
+                    - "PROTECTION_ENVIRONMENTAL:2"
+            boots:
+                material: "IRON_BOOTS"
+                enchantments:
+                    - "PROTECTION_ENVIRONMENTAL:2"
+                    - "PROTECTION_FALL:2"
+            items:
+                0:
+                    name: "&6&lWarrior"
+                    material: "DIAMOND_SWORD"
+                    enchantments:
+                        - "DAMAGE_ALL:2"
+            abilities:
+                - test

@@ -1,0 +1,34 @@
+# The version is to help determine which version this config is. Please don't modify this value.
+version: "1.0.0"
+
+# Print additional information in the console. Useful for figuring out errors and issues.
+debug: false
+
+# Should Champions be in Bungeecord mode?
+# Bungeecord mode basically takes over the server for the dedicated gamemode.
+Bungeecord: false
+FallbackServer: "Hub"
+
+Teams:
+    colour1: "RED"
+    colour2: "BLUE"
+
+Data:
+    # How long in minutes should Champions backup player data?
+    # Default is 5 hours
+    backup-timer: 300
+
+# Should Champions teleport the player to the Champions spawn.
+# If this is set to false then it will use the players last location when they joined.
+endTeleportSpawn: false
+
+# Modify sounds. The pitch ranges from 1 to 16.
+# Sounds can be found here https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
+# Volume ranges between 0 and 10 (0 being muted)
+sounds:
+    # sound played when a kit is selected
+    kitSelect:
+        enabled: true
+        sound: "ENTITY_PLAYER_LEVELUP"
+        pitch: 2
+        volume: 1
